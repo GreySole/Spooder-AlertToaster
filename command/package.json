@@ -1,0 +1,11 @@
+{
+  "name": "Alert Toaster",
+  "version": "1.0.0",
+  "description": "Pop up cards for all your stream alerts!",
+  "main": "command.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
