@@ -1,11 +1,11 @@
 {
   "name": "Alert Toaster",
   "version": "1.0.0",
-  "description": "Pop up cards for all your stream alerts!",
+  "description": "Slide in alerts for Twitch and Spooder events!",
   "main": "command.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "author": "Grey Sole",
   "license": "ISC"
 }

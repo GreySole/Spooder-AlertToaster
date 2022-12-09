@@ -2021,6 +2021,8 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
 }
 
 },{}],5:[function(require,module,exports){
+
+const SpooderVersion = "0.3.8";
 const OSC = require('osc-js');
 console.log("OSC GET");
 
@@ -2044,7 +2046,6 @@ async function getOSCSettings(){
 	var oscSettingsRaw = await fetch(window.location.origin+"/overlay/get?plugin="+pluginName+"&external="+isExternal)
 								.then(response => response.json());
 	var oscSettings = JSON.parse(oscSettingsRaw.express);
-	console.log(oscSettings);
 	
 	pluginSettings = oscSettings.settings;
 	oscIP = oscSettings.host;
@@ -2057,7 +2058,7 @@ async function getOSCSettings(){
 function initOSC(serverIP, serverPort){
 	
 	let pluginName = window.location.pathname.split("/")[2];
-  if(serverIP.startsWith("https")){
+  if(isExternal){
     serverIP = serverIP.split("/")[2];
     tcpPlugin = new OSC.WebsocketClientPlugin({host:serverIP,port:null,secure:true});
   }else{
@@ -2066,53 +2067,59 @@ function initOSC(serverIP, serverPort){
 	
 	osc = new OSC({plugin: tcpPlugin});
 	
-    osc.open();
-    osc.on("open", () =>{
-        console.log("OSC OPEN");
-		if(typeof onOSCOpen != "undefined"){
-			onOSCOpen();
-		}
-		
-		sendOSC('/'+pluginName+'/connect', 1.0);
-		lastGood = Date.now();
-		clearInterval(goodInterval);
-		goodInterval = setInterval(()=>{
-			
-			if(osc.status() == 1){
-				if(!oscConnected){
-					sendOSC('/'+pluginName+'/connect', 1.0);
-				}
-			}else{
-				if(oscConnected){
-					oscConnected = false;
-					window.dispatchEvent(new Event("lost_connection"));
-				}
-				osc.open();
-			}
-			
-		}, 1000);
-    });
+  osc.open();
+  osc.on("open", () =>{
+    console.log("OSC OPEN", osc);
+    if(typeof onOSCOpen != "undefined"){
+      onOSCOpen();
+    }
+    
+    sendOSC('/'+pluginName+'/connect', JSON.stringify({version:SpooderVersion, name:pluginName, type:window.location.pathname.split("/")[1], external:isExternal}));
+    lastGood = Date.now();
+    clearInterval(goodInterval);
+    goodInterval = setInterval(()=>{
+      
+      if(osc.status() == 1){
+        if(!oscConnected){
+          sendOSC('/'+pluginName+'/connect', JSON.stringify({version:SpooderVersion, name:pluginName, type:window.location.pathname.split("/")[1], external:isExternal}));
+        }
+      }else{
+        if(oscConnected){
+          oscConnected = false;
+          window.dispatchEvent(new Event("lost_connection"));
+        }else{
+          osc.open();
+        }
+      }
+      
+    }, 1000);
+  });
+
 	osc.on("/"+pluginName+"/connect/success", ()=>{
 		oscConnected = true;
-    if(!isExternal){
-		  sendOSC("/spooder/alert",JSON.stringify({"name":pluginName, "icon":"http://"+window.location.host+"/overlay/"+pluginName+"/icon.png", "text":pluginName+": OSC Connected"}));
+    if(typeof onConnect != "undefined"){
+      onConnect();
     }
   });
 	
     osc.on('*', (message)=>{
-        getOSCMessage(message);
+        if(typeof getOSCMessage != "undefined"){
+          getOSCMessage(message);
+        }
     });
-}
-
-window.onmessage = function(e){
-  if(e.data.address != null){
-    getOSCMessage(e.data);
-  }
 }
 
 window.sendOSC = function(address, message){
 	osc.send(new OSC.Message(address, message));
 }
+
+window.onerror = function(event){
+  if(oscConnected == true){
+    sendOSC("/spooder/plugin/error", {name:window.location.href, message:event.message, type:event.type});
+  }
+  return true;
+};
+
 },{"osc-js":7}],6:[function(require,module,exports){
 (function (global){(function (){
 // https://github.com/maxogden/websocket-stream/blob/48dc3ddf943e5ada668c31ccd94e9186f02fafbd/ws-fallback.js
