@@ -6,7 +6,7 @@
     "textStrokeColor":"#000000",
     "boxOpacity":"80",
     "borderOpacity":"100",
-	"displayexternalconnects":false
+	"displayexternalconnects":false,
     "alerts":{
         "channel.follow":{
             "icon":"FollowAlertIcon.gif",
