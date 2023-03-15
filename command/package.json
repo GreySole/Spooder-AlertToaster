@@ -1,6 +1,7 @@
 {
   "name": "Alert Toaster",
-  "version": "1.0.0",
+  "version": "4.0.0",
+  "spooder-version":"0.4.0",
   "description": "Slide in alerts for Twitch and Spooder events!",
   "main": "command.js",
   "scripts": {

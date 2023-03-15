@@ -11,8 +11,6 @@
 //Plugin settings to add
 //Box corner roundness
 
-
-
 var app = new PIXI.Application({
     backgroundAlpha:0,
     antialias:true,
@@ -53,22 +51,24 @@ var loadedAssets = {
 function onOSCOpen(){
 
 	let defaultImage = document.createElement("img");
-    defaultImage.src = "./assets/"+pluginSettings.defaultAlertIcon;
+    defaultImage.src = getAssetPath(pluginSettings.defaultAlertIcon);
 	loadedAssets["img"]["default"] = defaultImage;
     
 	let alerts = pluginSettings.alerts;
+	console.log("ALERTS", alerts);
 	for(let a in alerts){
 		if(alerts[a].sound != null && alerts[a].sound != ""){
-			PIXI.sound.add(a+"-sound", "./assets/"+alerts[a].sound);
-			app.loader.add(a+"-sound", "./assets/"+alerts[a].sound);
+			PIXI.sound.add(a+"-sound", getAssetPath(alerts[a].sound));
+			app.loader.add(a+"-sound", getAssetPath(alerts[a].sound));
+			console.log("SOUND LOADING", a+"-sound");
 		}
 		if(alerts[a].icon.endsWith("gif")){
-			app.loader.add(a, "./assets/"+alerts[a].icon);
+			app.loader.add(a, getAssetPath(alerts[a].icon));
 		}else{
 			let newImage = document.createElement("img");
-            newImage.src = "./assets/"+alerts[a].icon;
+            newImage.src = getAssetPath(alerts[a].icon);
             newImage.onerror = (e) => {
-                newImage.src = "./assets/"+pluginSettings.defaultAlertIcon;
+                newImage.src = getAssetPath(pluginSettings.defaultAlertIcon);
             }
             newImage.onload = () => {
                 newImage.width = 120;
@@ -106,6 +106,7 @@ const pixelRatio = window.devicePixelRatio || 1;
 
 var alertInterval = null;
 var alertQ = [];
+var persistentQ = [];
 var connectAlerts = {};
 
 window.addEventListener("lost_connection", ()=>{
@@ -130,7 +131,7 @@ function runQueue(){
 			let newAlert = alertQ.shift();
 			console.log("NEW ALERT",newAlert);
 			try{
-				createToast(newAlert[0], newAlert[1]);
+				createToast(newAlert[0], newAlert[1], newAlert[2]);
 			}catch(e){
 				console.log(e);
 			}
@@ -142,13 +143,22 @@ function runQueue(){
 	}, 300);
 }
 
-async function addToQueue(icon, text){
+async function addToQueue(icon, text, tts){
 	//return;
 	console.log("ADDING TO QUEUE", icon);
 	if(app.loader.resources[icon] == null){
 		await getImg(icon);
 	}
-	alertQ.push([icon, text]);
+	if(tts != null){
+		if(tts.voice == null){tts.voice = "david";}
+		let blob = await fetch(encodeURI("https://talkify.net/api/speech/v2?texttype=text&text="+text+"&fallbackLanguage=-1&voice="+tts.voice+"&rate=0.5&key="+pluginSettings.talkifykey+"&whisper=false&soft=false&wordbreakms=0&volume=0&pitch=0&format=mp3"))
+				.then(response => response.blob())
+				.then((myBlob)=>ttsBlob = URL.createObjectURL(myBlob));
+		tts.blob = blob;
+	}
+
+	alertQ.push([icon, text, tts]);
+	
 	runQueue();
 }
 
@@ -172,8 +182,9 @@ function getImg(url){
         }else{
 			let newImage = document.createElement("img");
             newImage.src = url;
+			newImage.crossOrigin = "anonymous";
             newImage.onerror = (e) => {
-                newImage.src = "./assets/"+pluginSettings.defaultAlertIcon;
+                newImage.src = getAssetPath(pluginSettings.defaultAlertIcon);
             }
             newImage.onload = () => {
                 newImage.width = 120;
@@ -195,29 +206,70 @@ function getSprite(url){
 	if(url==""){return;}
 	if(loadedAssets["gif"][url] != null){
 		return loadedAssets["gif"][url].clone();
-	}else{
+	}else if(loadedAssets["img"][url] != null){
 		
 		return new PIXI.Sprite.from(loadedAssets["img"][url]);
+	}else if(loadedAssets[url] != null){
+		return new PIXI.Sprite.from(loadedAssets[url]);
 	}
 }
 
-function createToast(icon,text){
+async function createToast(icon,text,tts){
 	
 	let newAlertBox = new PIXI.Container();
     let alertBoxFill = new PIXI.Graphics();
+
+	newAlertBox.closeBox = () => {
+        
+        createjs.Tween.get(newAlertBox, null)
+        .to({x:-505},500,createjs.Ease.getPowOut(4))
+        .call(() => {
+            toastContainer.removeChild(newAlertBox);
+        })
+    }
+    newAlertBox.timeout = ()=>{
+		if(newAlertBox.scrollInterval != null){
+			clearInterval(newAlertBox.scrollInterval);
+		}
+		console.log("BOX TIMEOUT");
+		newAlertBox.closeBox();
+	}
 
 	let boxColor = pluginSettings.defaultBoxColor.replace("#","0x");
 	let borderColor = pluginSettings.defaultBorderColor.replace("#","0x");
 	let boxOpacity = parseFloat(pluginSettings.boxOpacity)/100;
 	let borderOpacity = parseFloat(pluginSettings.borderOpacity)/100;
 
-	if(pluginSettings.alerts[icon] != null){
-		boxColor = pluginSettings.alerts[icon].boxColor.replace("#","0x");
-		borderColor = pluginSettings.alerts[icon].borderColor.replace("#","0x");
-		if(pluginSettings.alerts[icon].sound != null && pluginSettings.alerts[icon].sound != ''){
-			PIXI.sound.play(icon+"-sound");
+	
+	let settingskey = icon;
+	
+	if(pluginSettings.alerts[settingskey] != null){
+		boxColor = pluginSettings.alerts[settingskey].boxColor.replace("#","0x");
+		borderColor = pluginSettings.alerts[settingskey].borderColor.replace("#","0x");
+		if(pluginSettings.alerts[settingskey].sound != null && pluginSettings.alerts[settingskey].sound != ''){
+			if(tts != null){
+				console.log("PLAY SOUND", settingskey+"-sound", PIXI.sound);
+				let ttsSound = PIXI.sound.play(settingskey+"-sound");
+				
+				ttsSound.on("end", ()=>{
+					PIXI.sound.Sound.from({
+						url: tts.blob,
+						autoPlay: true,
+						complete: function() {
+							newAlertBox.timeout();
+						}
+					});
+					persistentQ.pop();
+				})
+				
+			}else{
+				PIXI.sound.play(settingskey+"-sound");
+			}
 		}
 	}
+
+	if(tts != null){icon = tts.profilepic}
+	else{setTimeout(newAlertBox.timeout, 5000)}
 
     alertBoxFill.beginFill(boxColor, boxOpacity);
     alertBoxFill.drawRoundedRect(0,0, 500, 120, 15);
@@ -235,7 +287,7 @@ function createToast(icon,text){
 
     alertBoxStroke.lineStyle(5.0, borderColor, borderOpacity, 0.5);
     alertBoxStroke.drawRoundedRect(2,2, 500, 120, 15);
-    newAlertBox.addChild(alertBoxStroke);
+    
 
     let alertText = new PIXI.Text(text, {
         fontFamily:"Helvetica",
@@ -250,41 +302,56 @@ function createToast(icon,text){
         wordWrapWidth: 350
     });
     alertText.x = 150;
-    alertText.y = 60-alertText.height/2;
+    alertText.y = (60-alertText.height/2);
+	alertText.mask = alertBoxMask;
+	if(alertText.height > 120){
+		alertText.y = 0;
+		setTimeout(()=>{
+			scrollAlertText(alertText);
+		}, 2000);
+		
+		alertText.scrollInterval = setInterval(()=>{
+			scrollAlertText(alertText);
+		}, 8000);
+	}
+	console.log("Alert text height",alertText.height);
     newAlertBox.addChild(alertText);
-
+	
+	newAlertBox.addChild(alertBoxStroke);
 
 	let toastChildren = toastContainer.children;
 	if(toastChildren.length>0){
         
 		for(let c in toastContainer.children){
 			let thisAlert = toastContainer.children[c];
-            let yIndex = toastContainer.children.length-c;
+            let yIndex = toastContainer.children.length+persistentQ.length-c;
 			createjs.Tween.get(thisAlert, null)
 		.to({y:(yIndex*120)},500,createjs.Ease.getPowOut(4));
 		}
 	}
-	if(toastChildren.length>=5){
-        let outChild = toastChildren[toastChildren.length-5];
+	if(toastChildren.length>=6){
+        let outChild = toastChildren[toastChildren.length-6];
         clearTimeout(outChild.timeout);
         outChild.closeBox();
 	}
-    newAlertBox.closeBox = () => {
-        
-        createjs.Tween.get(newAlertBox, null)
-        .to({x:-505},500,createjs.Ease.getPowOut(4))
-        .call(() => {
-            toastContainer.removeChild(newAlertBox);
-        })
-    }
-    newAlertBox.timeout = ()=>{newAlertBox.closeBox()}
-    setTimeout(newAlertBox.timeout, 5000);
+    
+    
 	toastContainer.addChild(newAlertBox);
 
     newAlertBox.x = -505;
+	newAlertBox.y = (120*persistentQ.length);
     createjs.Tween.get(newAlertBox, null)
     .to({x:0},500,createjs.Ease.getPowOut(4));
 	
+	if(tts != null){persistentQ.push([icon, text, tts]);}
+}
+
+function scrollAlertText(alertText){
+	createjs.Tween.get(alertText)
+	.to({y:-(alertText.height/2)-30},2000,null)
+	.wait(2000)
+	.to({y:0}, 2000, null)
+	.wait(2000);
 }
 
 //The overlay can't run without this function as it's bridged with the OSC modules in the bundle.
@@ -333,6 +400,13 @@ function getOSCMessage(message){
 					}
 					addToQueue(toastObj.icon, toastObj.text, 
 					toastObj.icon=="urgent"?"PanicSound1":null);
+				break;
+				case 'tts':
+						let ttsObj = JSON.parse(message.args[0]);
+						getImg(ttsObj.profilepic);
+						let toastName = "tts";
+						if(ttsObj.voice != null){toastName = "tts-"+ttsObj.voice;}
+						addToQueue(toastName, ttsObj.text, {voice:ttsObj.voice, profilepic:ttsObj.profilepic});
 				break;
 			}
 		break;

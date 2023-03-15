@@ -2022,7 +2022,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
 
 },{}],5:[function(require,module,exports){
 
-const SpooderVersion = "0.3.8";
+const SpooderVersion = "0.4.0";
 const OSC = require('osc-js');
 console.log("OSC GET");
 
@@ -2035,6 +2035,7 @@ var lastGood = null;
 
 window.oscIP = null;
 window.oscPort = null;
+window.pluginName = window.location.pathname.split("/")[2];
 window.pluginSettings = null;
 
 window.isExternal = window.location.origin.startsWith("https");
@@ -2042,8 +2043,11 @@ window.isExternal = window.location.origin.startsWith("https");
 getOSCSettings();
 
 async function getOSCSettings(){
-	let pluginName = window.location.pathname.split("/")[2];
-	var oscSettingsRaw = await fetch(window.location.origin+"/overlay/get?plugin="+pluginName+"&external="+isExternal)
+
+  window.getAssetPath = (asset)=>{
+    return window.location.origin+"/assets/"+pluginName+"/"+asset;
+  }
+	var oscSettingsRaw = await fetch(window.location.origin+"/plugin/get?plugin="+pluginName+"&external="+isExternal)
 								.then(response => response.json());
 	var oscSettings = JSON.parse(oscSettingsRaw.express);
 	
@@ -2057,7 +2061,6 @@ async function getOSCSettings(){
 
 function initOSC(serverIP, serverPort){
 	
-	let pluginName = window.location.pathname.split("/")[2];
   if(isExternal){
     serverIP = serverIP.split("/")[2];
     tcpPlugin = new OSC.WebsocketClientPlugin({host:serverIP,port:null,secure:true});
@@ -2076,7 +2079,10 @@ function initOSC(serverIP, serverPort){
     
     sendOSC('/'+pluginName+'/connect', JSON.stringify({version:SpooderVersion, name:pluginName, type:window.location.pathname.split("/")[1], external:isExternal}));
     lastGood = Date.now();
-    clearInterval(goodInterval);
+    if(goodInterval != null){
+      clearInterval(goodInterval);
+      goodInterval = null;
+    }
     goodInterval = setInterval(()=>{
       
       if(osc.status() == 1){
@@ -2110,6 +2116,9 @@ function initOSC(serverIP, serverPort){
 }
 
 window.sendOSC = function(address, message){
+  if(typeof message == "object"){
+    message = JSON.stringify(message);
+  }
 	osc.send(new OSC.Message(address, message));
 }
 

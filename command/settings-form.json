@@ -1,0 +1,181 @@
+{
+    "form":{
+        "defaultBoxColor":{
+            "label":"Default Box Color",
+            "type":"color"
+        },
+        "boxOpacity":{
+            "label":"Box Opacity",
+            "type":"range",
+            "options":{
+                "min":0,
+                "max":100,
+                "step":10
+            }
+        },
+        "defaultBorderColor":{
+            "label":"Default Border Color",
+            "type":"color"
+        },
+        "borderOpacity":{
+            "label":"Border Opacity",
+            "type":"range",
+            "options":{
+                "min":0,
+                "max":100,
+                "step":10
+            }
+        },
+        "defaultAlertIcon":{
+            "label":"Default Alert Icon",
+            "type":"asset",
+            "options":{
+                "assetType":"image",
+                "folder":"img",
+                "required":true
+            }
+        },
+        "textColor":{
+            "label":"Text Color",
+            "type":"color"
+        },
+        "textStrokeColor":{
+            "label":"Text Stroke Color",
+            "type":"color"
+        },
+        "displayexternalconnects":{
+            "label":"Display External /connect Messages",
+            "type":"boolean"
+        },
+        "talkifykey":{
+            "label":"Talkify API Key",
+            "type":"password"
+        },
+        "alerts":{
+            "label":"Alerts",
+            "type":"subform",
+            "form":{
+                "keyname":{
+                    "label":"Alert Type",
+                    "type":"select",
+                    "options":{
+                        "selections":{
+                            "command": "Command",
+                            "warning":"Warning",
+                            "urgent": "Connection Lost",
+                            "tts": "TTS",
+                            "tts-david": "TTS - David(EN Male)",
+                            "tts-hedda": "TTS - Hedda(DE)",
+                            "tts-hazel": "TTS - Hazel(GB)",
+                            "tts-zira": "TTS - Zira(EN Female)",
+                            "tts-helena": "TTS - Helena(ES)",
+                            "tts-hortense": "TTS - Hortense(FR)",
+                            "tts-lucia": "TTS - Lucia(IT)",
+                            "tts-haruka": "TTS - Haruka(JP)",
+                            "channel.update": "Channel Update",
+                            "channel.follow": "Follow",
+                            "channel.subscribe": "Subscribe",
+                            "channel.subscription.end": "Subscription End",
+                            "channel.subscription.gift": "Subscription Gift",
+                            "channel.subscription.message": "Subscription Message",
+                            "channel.cheer": "Cheer",
+                            "channel.raid": "Raid",
+                            "channel.ban": "Ban",
+                            "channel.unban": "Unban",
+                            "channel.moderator.add": "Mod Add",
+                            "channel.moderator.remove": "Mod Remove",
+                            "channel.channel_points_custom_reward.add": "Channel Points Custom Reward Add",
+                            "channel.channel_points_custom_reward.update": "Channel Points Custom Reward Update",
+                            "channel.channel_points_custom_reward.remove": "Channel Points Custom Reward Remove",
+                            "channel.channel_points_custom_reward_redemption.add": "Channel Points Custom Reward Redemption Add",
+                            "channel.channel_points_custom_reward_redemption.update": "Channel Points Custom Reward Redemption Update",
+                            "channel.poll.begin": "Poll Begin",
+                            "channel.poll.progress": "Poll Progress",
+                            "channel.poll.end": "Poll End",
+                            "channel.prediction.begin": "Prediction Begin",
+                            "channel.prediction.progress": "Prediction Progress",
+                            "channel.prediction.lock": "Prediction Lock",
+                            "channel.prediction.end": "Prediction End",
+                            "drop.entitlement.grant": "Drop Entitlement Grant",
+                            "extension.bits_transaction.create": "Extension Bits Transaction Create",
+                            "channel.goal.begin": "Goal Begin",
+                            "channel.goal.progress": "Goal Progress",
+                            "channel.goal.end": "Goal End",
+                            "channel.hype_train.begin": "Hype Train Begin",
+                            "channel.hype_train.progress": "Hype Train Progress",
+                            "channel.hype_train.end": "Hype Train End",
+                            "stream.online": "Stream Online",
+                            "stream.offline": "Stream Offline",
+                            "user.authorization.grant": "User Authorization Grant",
+                            "user.authorization.revoke": "User Authorization Revoke",
+                            "user.update": "User Update"
+                        }
+                    }
+                },
+                "icon":{
+                    "label":"Icon",
+                    "type":"asset",
+                    "options":{
+                        "assetType":"image",
+                        "folder":"img",
+                        "required":false
+                    }
+                },
+                "sound":{
+                    "label":"Sound",
+                    "type":"asset",
+                    "options":{
+                        "assetType":"sound",
+                        "folder":"sound",
+                        "required":false
+                    }
+                },
+                "customBoxColor":{
+                    "label":"Custom Box Color",
+                    "type":"boolean"
+                },
+                "boxColor":{
+                    "label":"Box Color",
+                    "type":"color",
+                    "showif":{
+                        "variable":"customBoxColor",
+                        "condition":"equals",
+                        "value":true
+                    }
+                },
+                "borderColor":{
+                    "label":"Border Color",
+                    "type":"color",
+                    "showif":{
+                        "variable":"customBoxColor",
+                        "condition":"equals",
+                        "value":true
+                    }
+                },
+                "alerttext":{
+                    "label":"Alert Message",
+                    "type":"code"
+                }
+            }
+        }
+    },
+    "defaults":{
+        "defaultBoxColor":"#00Fd00",
+        "defaultBorderColor":"#00cc00",
+        "borderOpacity":"100",
+        "boxOpacity":"80",
+        "displayexternalconnects":false,
+        "talkifykey":"",
+        "textColor":"#ffffff",
+        "textStrokeColor":"#000000",
+        "alerts":{
+            "keyname":"command",
+            "icon":"",
+            "sound":"",
+            "customBoxColor":false,
+            "boxColor":"#000000",
+            "borderColor":"#000000",
+            "alerttext":""
+        }
+    }
+}

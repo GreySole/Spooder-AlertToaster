@@ -1,3 +1,4 @@
+const path = require("path");
 class AlertToaster {
 	
 	constructor() {
@@ -13,6 +14,8 @@ class AlertToaster {
 	isConnected = false;
 
 	connectAlerts = {};
+
+	ttsVoices = ["david", "helena", "hedda", "zira", "hazel", "haruka", "hortense", "lucia"];
 	
 	/*List all your commands here to be accessible through the help command*/
 	commandList = {
@@ -43,9 +46,9 @@ class AlertToaster {
 				}
 			}
 			if((pluginInfo.external == true && this.settings.displayexternalconnects == true) || pluginInfo.external == false){
-				let pluginName = activePlugins[pluginInfo.name]?._name!=null?activePlugins[pluginInfo.name]._name:pluginInfo.name;
+				let pluginName = activePlugins[pluginInfo.name]?.name!=null?activePlugins[pluginInfo.name].name:pluginInfo.name;
 				let externalTxt = pluginInfo.external == true?" externally":"";
-				sendToTCP("/alerttoaster/alert", JSON.stringify({"icon":"http://"+sconfig.network.host+":"+sconfig.network.host_port+"/overlay/"+pluginInfo.name+"/icon.png", "text":pluginName+": OSC Connected"+externalTxt}));
+				sendToTCP("/alerttoaster/alert", JSON.stringify({"icon":"http://"+sconfig.network.host+":"+sconfig.network.host_port+"/icons/"+pluginInfo.name+".png", "text":pluginName+": OSC Connected"+externalTxt}));
 			}
 		}
 		
@@ -56,11 +59,10 @@ class AlertToaster {
 					name:message.address.split("/")[1]
 				}
 			}
-			console.log(pluginInfo);
-			let pluginName = activePlugins[pluginInfo.name]?._name!=null?activePlugins[pluginInfo.name]._name:pluginInfo.name;
+			let pluginName = activePlugins[pluginInfo.name]?.name!=null?activePlugins[pluginInfo.name].name:pluginInfo.name;
 			if((pluginInfo.external == true && this.settings.displayexternalconnects == true) || pluginInfo.external == false){
 				let externalTxt = pluginInfo.external == true?" externally":"";
-				this.connectAlerts[pluginInfo.name] = {address:"/spooder/alert",data:JSON.stringify({"icon":"http://"+sconfig.network.host+":"+sconfig.network.host_port+"/overlay/"+pluginInfo.name+"/icon.png", "text":pluginName+": OSC Connected"+externalTxt})};
+				this.connectAlerts[pluginInfo.name] = {address:"/spooder/alert",data:JSON.stringify({"icon":"http://"+sconfig.network.host+":"+sconfig.network.host_port+"/icons/"+pluginInfo.name+".png", "text":pluginName+": OSC Connected"+externalTxt})};
 			}
 			return;
 		}
@@ -75,11 +77,46 @@ class AlertToaster {
 		}
 	}
 
-	onEvent(eventName, eventData){
+	async onEvent(eventName, eventData){
 		
 		if(eventName=="eventstart"){
 			sendToTCP("/events/start/"+eventName, eventData.username+" has activated "+eventData.eventInfo.name+"!");
+		}else if(eventName.startsWith("tts")){
+			
+			let voice = "david";
+			let fullMessage = eventData.user_input;
+			let firstWord = fullMessage.substring(0, fullMessage.indexOf(" ")).toLowerCase();
+			if(this.ttsVoices.includes(firstWord)){
+				voice = firstWord;
+				fullMessage = fullMessage.substring(firstWord.length+1);
+			}
+			let profilePicture = await this.getProfilePicture(eventData.username);
+			sendToTCP("/alerttoaster/tts", JSON.stringify({icon:"tts", text:fullMessage, voice:voice, profilepic:profilePicture}));
+		}else if(eventName == "alert"){
+			sendToTCP("/alerttoaster/alert", eventData);
 		}
+	}
+
+	getProfilePicture(user){
+
+		return new Promise(async (res, rej)=>{
+			fetch("https://api.twitch.tv/helix/users?login="+user, {
+				method: 'GET',
+				headers:{
+					"Client-Id": oauth["client-id"],
+					"Authorization": " Bearer "+appToken,
+					"Content-Type": "application/json"
+				}
+			})
+			.then(response => response.json())
+			.then(data => {
+				
+				if(data.data[0] != null){
+					res(data.data[0]["profile_image_url"]);
+				}
+			});
+			
+		})
 	}
 }
 
