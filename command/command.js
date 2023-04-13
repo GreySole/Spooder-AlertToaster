@@ -80,7 +80,7 @@ class AlertToaster {
 	async onEvent(eventName, eventData){
 		
 		if(eventName=="eventstart"){
-			sendToTCP("/events/start/"+eventName, eventData.username+" has activated "+eventData.eventInfo.name+"!");
+			sendToTCP("/events/start/"+eventName, eventData.displayName+" has activated "+eventData.eventInfo.name+"!");
 		}else if(eventName.startsWith("tts")){
 			
 			let voice = "david";

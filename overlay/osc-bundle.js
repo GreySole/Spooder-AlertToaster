@@ -2022,7 +2022,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
 
 },{}],5:[function(require,module,exports){
 
-const SpooderVersion = "0.4.0";
+const SpooderVersion = "0.4.1";
 const OSC = require('osc-js');
 console.log("OSC GET");
 
@@ -2102,6 +2102,7 @@ function initOSC(serverIP, serverPort){
   });
 
 	osc.on("/"+pluginName+"/connect/success", ()=>{
+    if(oscConnected){return;}
 		oscConnected = true;
     if(typeof onConnect != "undefined"){
       onConnect();
@@ -2115,19 +2116,31 @@ function initOSC(serverIP, serverPort){
     });
 }
 
-window.sendOSC = function(address, message){
-  if(typeof message == "object"){
-    message = JSON.stringify(message);
+window.sendOSC = function(address, ...message){
+  let pMessage = null;
+  if(message.length == 1){
+    pMessage = message[0];
+  }else{
+    pMessage = message;
   }
-	osc.send(new OSC.Message(address, message));
+  
+  if(typeof pMessage == "object" && !Array.isArray(pMessage)){
+    pMessage = JSON.stringify(pMessage);
+  }
+  if(Array.isArray(pMessage)){
+    osc.send(new OSC.Message(address, ...pMessage));
+  }else{
+    osc.send(new OSC.Message(address, pMessage));
+  }
 }
 
 window.onerror = function(event){
   if(oscConnected == true){
-    sendOSC("/spooder/plugin/error", {name:window.location.href, message:event.message, type:event.type});
+    sendOSC("/spooder/plugin/error", {name:window.location.href, message:event, type:event.type});
   }
-  return true;
+  return false;
 };
+
 
 },{"osc-js":7}],6:[function(require,module,exports){
 (function (global){(function (){
