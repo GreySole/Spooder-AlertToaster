@@ -48,7 +48,7 @@ var loadedAssets = {
 	"img":{}
 };
 
-function onOSCOpen(){
+function onConnect(){
 
 	let defaultImage = document.createElement("img");
     defaultImage.src = getAssetPath(pluginSettings.defaultAlertIcon);
@@ -77,6 +77,7 @@ function onOSCOpen(){
 					loadedAssets["img"] = {};
 				}
 				loadedAssets["img"][a] = newImage;
+				console.log("IMAGE LOADED", a+"");
             }
 		}
 		
@@ -268,7 +269,7 @@ async function createToast(icon,text,tts){
 		}
 	}
 
-	if(tts != null){icon = tts.profilepic}
+	if(tts != null && tts.profilepic != null){icon = tts.profilepic}
 	else{setTimeout(newAlertBox.timeout, 5000)}
 
     alertBoxFill.beginFill(boxColor, boxOpacity);
@@ -403,10 +404,26 @@ function getOSCMessage(message){
 				break;
 				case 'tts':
 						let ttsObj = JSON.parse(message.args[0]);
-						getImg(ttsObj.profilepic);
-						let toastName = "tts";
+						if(ttsObj.profilepic != null){
+							getImg(ttsObj.profilepic);
+						}
+						
+						let toastName = ttsObj.icon;
+						
 						if(ttsObj.voice != null){toastName = "tts-"+ttsObj.voice;}
 						addToQueue(toastName, ttsObj.text, {voice:ttsObj.voice, profilepic:ttsObj.profilepic});
+				break;
+			}
+		break;
+		case 'spooder':
+			switch(address[2]){
+				case 'alert':
+					let toastObj = JSON.parse(message.args[0]);
+					if(connectAlerts[toastObj.name] == null){
+						connectAlerts[toastObj.name] = {icon:toastObj.icon, text:toastObj.text};
+					}
+					addToQueue(toastObj.icon, toastObj.text, 
+					toastObj.icon=="urgent"?"PanicSound1":null);
 				break;
 			}
 		break;

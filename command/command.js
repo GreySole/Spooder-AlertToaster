@@ -1,7 +1,36 @@
 const path = require("path");
+const fs = require("fs");
 class AlertToaster {
 	
 	constructor() {
+		if(twitch.eventsubs != null){
+			let settingsFormFile = fs.existsSync(__dirname+"/settings-form.json") ? fs.readFileSync(__dirname+"/settings-form.json") : null;
+			if(settingsFormFile != null){
+				try{
+					let settingsForm = JSON.parse(settingsFormFile);
+					let newSelections = {
+						"command": "Command",
+						"warning":"Warning",
+						"urgent": "Connection Lost",
+						"tts": "TTS",
+						"tts-david": "TTS - David(EN Male)",
+						"tts-hedda": "TTS - Hedda(DE)",
+						"tts-hazel": "TTS - Hazel(GB)",
+						"tts-zira": "TTS - Zira(EN Female)",
+						"tts-helena": "TTS - Helena(ES)",
+						"tts-hortense": "TTS - Hortense(FR)",
+						"tts-lucia": "TTS - Lucia(IT)",
+						"tts-haruka": "TTS - Haruka(JP)",
+					};
+					Object.assign(newSelections, twitch.eventsubs);
+					settingsForm.form.alerts.form.keyname.options.selections = newSelections;
+					fs.writeFileSync(__dirname+"/settings-form.json", JSON.stringify(settingsForm));
+				}catch(e){
+					console.log("AlertToaster:", "Unable to apply server Eventsubs to SettingsForm");
+				}
+				
+			}
+		}
 		this.onChat = this.onChat.bind(this);
 		this.onOSC = this.onOSC.bind(this);
 	}
@@ -85,38 +114,34 @@ class AlertToaster {
 			
 			let voice = "david";
 			let fullMessage = eventData.user_input;
-			let firstWord = fullMessage.substring(0, fullMessage.indexOf(" ")).toLowerCase();
-			if(this.ttsVoices.includes(firstWord)){
-				voice = firstWord;
-				fullMessage = fullMessage.substring(firstWord.length+1);
+			if(eventName.includes("-")){
+				voice = eventName.split("-")[1];
+			}else{
+				let firstWord = fullMessage.substring(0, fullMessage.indexOf(" ")).toLowerCase();
+				if(this.ttsVoices.includes(firstWord)){
+					voice = firstWord;
+					fullMessage = fullMessage.substring(firstWord.length+1);
+				}
 			}
-			let profilePicture = await this.getProfilePicture(eventData.username);
-			sendToTCP("/alerttoaster/tts", JSON.stringify({icon:"tts", text:fullMessage, voice:voice, profilepic:profilePicture}));
+			
+			if(this.settings.alerts[eventName]?.icon == null || this.settings.alerts[eventName]?.icon == ""){
+				let profilePicture = await this.getProfilePicture(eventData.username);
+				console.log("GOT PFP", profilePicture);
+				sendToTCP("/alerttoaster/tts", JSON.stringify({icon:"tts", text:fullMessage, voice:voice, profilepic:profilePicture}));
+			}else{
+				console.log(this.settings.alerts[eventName].icon);
+				sendToTCP("/alerttoaster/tts", JSON.stringify({icon:this.settings.alerts[eventName].icon, text:fullMessage, voice:voice}));
+			}
+			
 		}else if(eventName == "alert"){
 			sendToTCP("/alerttoaster/alert", eventData);
+		}else if(eventName == "eventsub"){
+			sendToTCP("/eventsub/"+eventData.eventsubType, eventData);
 		}
 	}
 
 	getProfilePicture(user){
-
-		return new Promise(async (res, rej)=>{
-			fetch("https://api.twitch.tv/helix/users?login="+user, {
-				method: 'GET',
-				headers:{
-					"Client-Id": oauth["client-id"],
-					"Authorization": " Bearer "+appToken,
-					"Content-Type": "application/json"
-				}
-			})
-			.then(response => response.json())
-			.then(data => {
-				
-				if(data.data[0] != null){
-					res(data.data[0]["profile_image_url"]);
-				}
-			});
-			
-		})
+		return twitch.callAppAPI("https://api.twitch.tv/helix/users?login="+user).then(data=>data.data[0].profile_image_url);
 	}
 }
 
