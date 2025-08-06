@@ -1,0 +1,33 @@
+name: Create Release Zip
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  create-zip:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create repository zip
+        run: |
+          # Remove .git directory to avoid including git history in zip
+          rm -rf .git
+
+          # Create zip of entire repository
+          zip -r "Spooder-AlertToaster-${{ github.event.release.tag_name }}.zip" . -x "*.git*"
+
+      - name: Upload zip to release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./Spooder-AlertToaster-${{ github.event.release.tag_name }}.zip
+          asset_name: Spooder-AlertToaster-${{ github.event.release.tag_name }}.zip
+          asset_content_type: application/zip
