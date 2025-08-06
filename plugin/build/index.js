@@ -35,14 +35,11 @@ class AlertToaster extends PluginBase_1.default {
         this.connectAlerts = {};
         this.ttsVoices = ['david', 'helena', 'hedda', 'zira', 'hazel', 'haruka', 'hortense', 'lucia'];
     }
-    onLoad() {
-        console.log('I FARTED AND IT SMELLED GOOD', this.spooderConfig);
-    }
+    onLoad() { }
     onChat(message) { }
     onCommunityChat(type, message) { }
     onOSC(message) {
         const activePlugins = this.activePlugins;
-        const sendToTCP = this.osc.sendToTCP;
         if (!this.isConnected && message.address.endsWith('/connect')) {
             let pluginInfo = typeof message.args[0] === 'string' ? JSON.parse(message.args[0]) : {};
             if (pluginInfo == 1) {
@@ -106,28 +103,62 @@ class AlertToaster extends PluginBase_1.default {
         }
     }
     async onEvent(eventName, eventData) {
-        const sendToTCP = this.osc.sendToTCP;
         if (eventName == 'eventstart') {
-            this.osc.sendToTCP('/events/start/' + eventName, eventData.username + ' has activated ' + eventData.eventInfo.name + '!');
+            this.osc.sendToTCP('/events/start/' + eventName, eventData.username + ' has activated ' + eventName + '!');
         }
-        else if (eventName.startsWith('tts')) {
-            let voice = 'david';
-            let fullMessage = eventData.user_input;
-            let firstWord = fullMessage.substring(0, fullMessage.indexOf(' ')).toLowerCase();
-            if (this.ttsVoices.includes(firstWord)) {
-                voice = firstWord;
-                fullMessage = fullMessage.substring(firstWord.length + 1);
+        else if (eventName == 'play_tts') {
+            const ttsData = eventData.pluginEventData;
+            if (!ttsData) {
+                console.error('No TTS data provided');
+                return;
             }
-            let profilePicture = await this.getProfilePicture(eventData.username);
+            console.log('AlertToaster TTS Data', ttsData);
+            let fullMessage = eventData.message;
+            let firstWord = fullMessage.substring(0, fullMessage.indexOf(' ')).toLowerCase();
+            let voice = 'david';
+            let sound = '';
+            if (ttsData.voice === 'tts') {
+                if (this.ttsVoices.includes(firstWord)) {
+                    voice = firstWord.trim();
+                    fullMessage = fullMessage.substring(firstWord.length + 1);
+                }
+            }
+            else {
+                voice = ttsData.voice || 'david';
+            }
+            if (ttsData.sound_type === 'single') {
+                sound = ttsData.sound || '';
+            }
+            else {
+                const soundKey = Object.keys(ttsData).find((key) => key.includes(voice));
+                if (soundKey) {
+                    sound = ttsData[soundKey] || '';
+                }
+            }
+            let profilePicture = '';
+            if (ttsData.icon_type === 'profile_pic') {
+                profilePicture = await this.getProfilePicture(eventData.username);
+            }
+            else {
+                profilePicture = ttsData.icon || '';
+            }
             this.osc.sendToTCP('/alerttoaster/tts', JSON.stringify({
                 icon: 'tts',
                 text: fullMessage,
                 voice: voice,
-                profilepic: profilePicture,
+                sound: sound,
+                ttsIcon: profilePicture,
             }));
         }
-        else if (eventName == 'alert') {
-            this.osc.sendToTCP('/alerttoaster/alert', eventData);
+        else if (eventName == 'show_alert') {
+            let alertText = eventData.pluginEventData?.alerttext ?? '';
+            this.osc.sendToTCP('/alerttoaster/alert', {
+                icon: eventData.pluginEventData?.icon,
+                text: alertText,
+                sound: eventData.pluginEventData?.sound,
+                boxColor: eventData.pluginEventData?.boxColor,
+                borderColor: eventData.pluginEventData?.borderColor,
+            });
         }
     }
     getProfilePicture(user) {

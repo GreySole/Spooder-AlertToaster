@@ -14,12 +14,23 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+
+      - name: Install dependencies and build
+        run: |
+          cd plugin
+          npm install
+          npm run build
+
       - name: Create repository zip
         run: |
           # Remove .git directory to avoid including git history in zip
           rm -rf .git
 
-          # Create zip of entire repository
+          # Create zip of entire repository (including the built files)
           zip -r "Spooder-AlertToaster-${{ github.event.release.tag_name }}.zip" . -x "*.git*"
 
       - name: Upload zip to release
