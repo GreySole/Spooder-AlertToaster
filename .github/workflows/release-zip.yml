@@ -22,8 +22,12 @@ jobs:
       - name: Install dependencies and build
         run: |
           cd plugin
+          npm install -g typescript
           npm install
-          npx tsc --outDir build
+          ls -la
+          cat package.json
+          npx tsc --version
+          npx tsc
 
       - name: Create repository zip
         run: |
