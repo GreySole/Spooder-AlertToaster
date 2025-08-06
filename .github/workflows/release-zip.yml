@@ -23,7 +23,7 @@ jobs:
         run: |
           cd plugin
           npm install
-          npm run build
+          npx tsc --outDir build
 
       - name: Create repository zip
         run: |
