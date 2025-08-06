@@ -23,12 +23,39 @@ jobs:
         run: |
           cd plugin
           npm install
+          # Install ncc for bundling
+          npm install @vercel/ncc
           # Remove the problematic tsc package that's not the TypeScript compiler
           npm uninstall tsc || true
-          # Verify TypeScript is available and show version
-          npx typescript --version || echo "TypeScript not found via npx typescript"
-          # Try using the TypeScript compiler directly from node_modules
-          node ./node_modules/typescript/bin/tsc || echo "Direct TypeScript call failed"
+          # Compile TypeScript first
+          node ./node_modules/typescript/bin/tsc || echo "TypeScript compilation failed"
+          # Get the main entry point from package.json and bundle with ncc
+          node -e "
+          const pkg = require('./package.json');
+          const path = require('path');
+          // Convert the main field to the compiled JS equivalent in dist folder
+          let mainFile = pkg.main;
+          if (mainFile.endsWith('.ts')) {
+            mainFile = mainFile.replace('.ts', '.js').replace('src/', 'dist/');
+          } else if (mainFile.startsWith('src/')) {
+            mainFile = mainFile.replace('src/', 'dist/');
+          }
+          console.log('Using main entry point:', mainFile);
+          require('child_process').execSync(\`npx ncc build \${mainFile} -o build --source-map\`, {stdio: 'inherit'});
+          "
+          # Create manifest.json from package.json
+          node -e "
+          const pkg = require('./package.json');
+          const manifest = {
+            name: pkg.name,
+            author: pkg.author,
+            main: 'index.js',
+            version: pkg.version,
+            description: pkg.description
+          };
+          require('fs').writeFileSync('./build/manifest.json', JSON.stringify(manifest, null, 2));
+          console.log('Created manifest.json:', manifest);
+          "
         continue-on-error: true
 
       - name: Create repository zip
