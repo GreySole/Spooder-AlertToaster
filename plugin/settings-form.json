@@ -1,0 +1,129 @@
+{
+  "form": {
+    "defaultBoxColor": { "label": "Default Box Color", "type": "color" },
+    "boxOpacity": {
+      "label": "Box Opacity",
+      "type": "range",
+      "options": { "min": 0, "max": 100, "step": 10 }
+    },
+    "defaultBorderColor": { "label": "Default Border Color", "type": "color" },
+    "borderOpacity": {
+      "label": "Border Opacity",
+      "type": "range",
+      "options": { "min": 0, "max": 100, "step": 10 }
+    },
+    "defaultAlertIcon": {
+      "label": "Default Alert Icon",
+      "type": "asset",
+      "options": { "assetType": "image", "folder": "img", "required": true }
+    },
+    "textColor": { "label": "Text Color", "type": "color" },
+    "textStrokeColor": { "label": "Text Stroke Color", "type": "color" },
+    "displayexternalconnects": { "label": "Display External /connect Messages", "type": "boolean" },
+    "talkifykey": { "label": "Talkify API Key", "type": "password" },
+    "command_section": {
+      "label": "Command Alert Settings",
+      "type": "section"
+    },
+    "command_icon": {
+      "label": "Icon",
+      "type": "asset",
+      "options": { "assetType": "image", "folder": "img", "required": false }
+    },
+    "command_sound": {
+      "label": "Sound",
+      "type": "asset",
+      "options": { "assetType": "sound", "folder": "sound", "required": false }
+    },
+    "command_customBoxColor": { "label": "Custom Box Color", "type": "boolean" },
+    "command_boxColor": {
+      "label": "Box Color",
+      "type": "color",
+      "showif": { "variable": "command_customBoxColor", "condition": "equals", "value": true }
+    },
+    "command_borderColor": {
+      "label": "Border Color",
+      "type": "color",
+      "showif": { "variable": "command_customBoxColor", "condition": "equals", "value": true }
+    },
+    "warning_section": {
+      "label": "Warning Alert Settings",
+      "type": "section"
+    },
+    "warning_icon": {
+      "label": "Icon",
+      "type": "asset",
+      "options": { "assetType": "image", "folder": "img", "required": false }
+    },
+    "warning_sound": {
+      "label": "Sound",
+      "type": "asset",
+      "options": { "assetType": "sound", "folder": "sound", "required": false }
+    },
+    "warning_customBoxColor": { "label": "Custom Box Color", "type": "boolean" },
+    "warning_boxColor": {
+      "label": "Box Color",
+      "type": "color",
+      "showif": { "variable": "warning_customBoxColor", "condition": "equals", "value": true }
+    },
+    "warning_borderColor": {
+      "label": "Border Color",
+      "type": "color",
+      "showif": { "variable": "warning_customBoxColor", "condition": "equals", "value": true }
+    },
+    "urgent_section": {
+      "label": "Urgent Alert Settings",
+      "type": "section"
+    },
+    "urgent_icon": {
+      "label": "Icon",
+      "type": "asset",
+      "options": { "assetType": "image", "folder": "img", "required": false }
+    },
+    "urgent_sound": {
+      "label": "Sound",
+      "type": "asset",
+      "options": { "assetType": "sound", "folder": "sound", "required": false }
+    },
+    "urgent_customBoxColor": { "label": "Custom Box Color", "type": "boolean" },
+    "urgent_boxColor": {
+      "label": "Box Color",
+      "type": "color",
+      "showif": { "variable": "urgent_customBoxColor", "condition": "equals", "value": true }
+    },
+    "urgent_borderColor": {
+      "label": "Border Color",
+      "type": "color",
+      "showif": { "variable": "urgent_customBoxColor", "condition": "equals", "value": true }
+    },
+    "urgent_text": {
+      "label": "Urgent Alert Text",
+      "type": "text"
+    }
+  },
+  "defaults": {
+    "defaultBoxColor": "#00Fd00",
+    "defaultBorderColor": "#00cc00",
+    "borderOpacity": "100",
+    "boxOpacity": "80",
+    "displayexternalconnects": false,
+    "talkifykey": "",
+    "textColor": "#ffffff",
+    "textStrokeColor": "#000000",
+    "command_icon": "",
+    "command_sound": "",
+    "command_customBoxColor": false,
+    "command_boxColor": "#ff0000",
+    "command_borderColor": "#cc0000",
+    "warning_icon": "",
+    "warning_sound": "",
+    "warning_customBoxColor": false,
+    "warning_boxColor": "#ff0000",
+    "warning_borderColor": "#cc0000",
+    "urgent_icon": "",
+    "urgent_sound": "",
+    "urgent_customBoxColor": false,
+    "urgent_boxColor": "#ff0000",
+    "urgent_borderColor": "#cc0000"
+  }
+}

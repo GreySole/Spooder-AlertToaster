@@ -1,0 +1,250 @@
+{
+  "show_alert": {
+    "label": "Show Alert",
+    "form": {
+      "icon": {
+        "label": "Icon",
+        "type": "asset",
+        "options": {
+          "assetType": "image",
+          "folder": "img",
+          "required": false
+        }
+      },
+      "sound": {
+        "label": "Sound",
+        "type": "asset",
+        "options": {
+          "assetType": "sound",
+          "folder": "sound",
+          "required": false
+        }
+      },
+      "customBoxColor": {
+        "label": "Custom Box Color",
+        "type": "boolean"
+      },
+      "boxColor": {
+        "label": "Box Color",
+        "type": "color",
+        "showif": {
+          "variable": "customBoxColor",
+          "condition": "equals",
+          "value": true
+        }
+      },
+      "borderColor": {
+        "label": "Border Color",
+        "type": "color",
+        "showif": {
+          "variable": "customBoxColor",
+          "condition": "equals",
+          "value": true
+        }
+      },
+      "alerttext": {
+        "label": "Alert Message",
+        "type": "code",
+        "options": {
+          "use_response_processor": true
+        }
+      }
+    },
+    "defaults": {
+      "icon": "",
+      "sound": "",
+      "customBoxColor": false,
+      "boxColor": "#000000",
+      "borderColor": "#000000",
+      "alerttext": ""
+    }
+  },
+  "play_tts": {
+    "label": "Play TTS",
+    "form": {
+      "voice": {
+        "label": "Voice",
+        "type": "select",
+        "description": "Text Sensitive reads the first word of the message to determine the voice (excluding parentheses).",
+        "options": {
+          "selections": {
+            "tts": "Text Sensitive (Default: David)",
+            "tts-david": "David (EN Male)",
+            "tts-hedda": "Hedda (DE)",
+            "tts-hazel": "Hazel (GB)",
+            "tts-zira": "Zira (EN Female)",
+            "tts-helena": "Helena (ES)",
+            "tts-hortense": "Hortense (FR)",
+            "tts-lucia": "Lucia (IT)",
+            "tts-haruka": "Haruka (JP)"
+          }
+        }
+      },
+      "sound_type": {
+        "label": "Sound Type",
+        "type": "select",
+        "options": {
+          "selections": {
+            "single": "Single",
+            "multiple": "Multiple (For text sensitive)"
+          }
+        }
+      },
+      "sound": {
+        "label": "Sound",
+        "type": "asset",
+        "options": {
+          "assetType": "sound",
+          "folder": "sound",
+          "required": false
+        },
+        "showif": {
+          "variable": "sound_type",
+          "condition": "equals",
+          "value": "single"
+        }
+      },
+      "sound_david": {
+        "label": "Sound David",
+        "type": "asset",
+        "options": {
+          "assetType": "sound",
+          "folder": "sound",
+          "required": false
+        },
+        "showif": {
+          "variable": "sound_type",
+          "condition": "equals",
+          "value": "multiple"
+        }
+      },
+      "sound_helena": {
+        "label": "Sound Helena",
+        "type": "asset",
+        "options": {
+          "assetType": "sound",
+          "folder": "sound",
+          "required": false
+        },
+        "showif": {
+          "variable": "sound_type",
+          "condition": "equals",
+          "value": "multiple"
+        }
+      },
+      "sound_hedda": {
+        "label": "Sound Hedda",
+        "type": "asset",
+        "options": {
+          "assetType": "sound",
+          "folder": "sound",
+          "required": false
+        },
+        "showif": {
+          "variable": "sound_type",
+          "condition": "equals",
+          "value": "multiple"
+        }
+      },
+      "sound_hazel": {
+        "label": "Sound Hazel",
+        "type": "asset",
+        "options": {
+          "assetType": "sound",
+          "folder": "sound",
+          "required": false
+        },
+        "showif": {
+          "variable": "sound_type",
+          "condition": "equals",
+          "value": "multiple"
+        }
+      },
+      "sound_zira": {
+        "label": "Sound Zira",
+        "type": "asset",
+        "options": {
+          "assetType": "sound",
+          "folder": "sound",
+          "required": false
+        },
+        "showif": {
+          "variable": "sound_type",
+          "condition": "equals",
+          "value": "multiple"
+        }
+      },
+      "sound_hortense": {
+        "label": "Sound Hortense",
+        "type": "asset",
+        "options": {
+          "assetType": "sound",
+          "folder": "sound",
+          "required": false
+        },
+        "showif": {
+          "variable": "sound_type",
+          "condition": "equals",
+          "value": "multiple"
+        }
+      },
+      "sound_lucia": {
+        "label": "Sound Lucia",
+        "type": "asset",
+        "options": {
+          "assetType": "sound",
+          "folder": "sound",
+          "required": false
+        },
+        "showif": {
+          "variable": "sound_type",
+          "condition": "equals",
+          "value": "multiple"
+        }
+      },
+      "sound_haruka": {
+        "label": "Sound Haruka",
+        "type": "asset",
+        "options": {
+          "assetType": "sound",
+          "folder": "sound",
+          "required": false
+        },
+        "showif": {
+          "variable": "sound_type",
+          "condition": "equals",
+          "value": "multiple"
+        }
+      },
+      "icon_type": {
+        "label": "Icon",
+        "type": "select",
+        "options": {
+          "selections": {
+            "profile_pic": "Profile Picture",
+            "asset": "Asset"
+          }
+        }
+      },
+      "icon": {
+        "label": "Asset Icon",
+        "type": "asset",
+        "options": {
+          "assetType": "image",
+          "folder": "img",
+          "required": false
+        },
+        "showif": {
+          "variable": "icon_type",
+          "condition": "equals",
+          "value": "asset"
+        }
+      }
+    },
+    "defaults": {
+      "voice": "tts",
+      "icon_type": "profile_pic",
+      "icon": ""
+    }
+  }
+}
