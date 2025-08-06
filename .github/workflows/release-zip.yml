@@ -22,12 +22,9 @@ jobs:
       - name: Install dependencies and build
         run: |
           cd plugin
-          npm install -g typescript
           npm install
-          ls -la
-          cat package.json
-          npx tsc --version
-          npx tsc
+          # Use the TypeScript compiler from the typescript package
+          ./node_modules/.bin/tsc
 
       - name: Create repository zip
         run: |
