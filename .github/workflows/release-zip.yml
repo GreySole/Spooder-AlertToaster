@@ -41,13 +41,14 @@ jobs:
             mainFile = mainFile.replace('src/', 'dist/');
           }
           console.log('Using main entry point:', mainFile);
-          require('child_process').execSync(\`npx ncc build \${mainFile} -o build --source-map\`, {stdio: 'inherit'});
+          require('child_process').execSync(\`npx ncc build \${mainFile} -o build --source-map --minify\`, {stdio: 'inherit'});
           "
           # Create manifest.json from package.json
           node -e "
           const pkg = require('./package.json');
           const manifest = {
             name: pkg.name,
+            display_name: pkg.display_name,
             author: pkg.author,
             main: 'index.js',
             version: pkg.version,

@@ -1,7 +1,0 @@
-{
-  "name": "Alert Toaster",
-  "main": "index.js",
-  "author": "Grey Sole",
-  "version": "0.5.0",
-  "description": "Slide in alerts for Twitch and Spooder events!"
-}
