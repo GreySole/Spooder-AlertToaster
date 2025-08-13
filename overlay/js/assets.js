@@ -1,39 +1,50 @@
+const { getAsset } = require('node:sea');
+
 function onOSCOpen() {
   let defaultImage = document.createElement('img');
-  defaultImage.src = getAssetPath(pluginSettings.defaultAlertIcon);
+  defaultImage.src =
+    pluginSettings.defaultAlertIcon != ''
+      ? getAssetPath(pluginSettings.defaultAlertIcon)
+      : './assets/img/DefaultAlertIcon.png';
   loadedAssets['img']['default'] = defaultImage;
 
   let alerts = {
     command: {
-      icon: pluginSettings.command_icon ?? pluginSettings.defaultAlertIcon,
-      sound: pluginSettings.command_sound ?? null,
-      boxColor: pluginSettings.command_customBoxColor
-        ? pluginSettings.command_boxColor
+      icon: pluginSettings.command?.icon
+        ? pluginSettings.command.icon
+        : '_/assets/img/CommandAlertIcon.png',
+      sound: pluginSettings.command?.sound ?? null,
+      boxColor: pluginSettings.command?.customBoxColor
+        ? pluginSettings.command?.boxColor
         : pluginSettings.defaultBoxColor,
-      borderColor: pluginSettings.command_customBoxColor
-        ? pluginSettings.command_borderColor
+      borderColor: pluginSettings.command?.customBoxColor
+        ? pluginSettings.command?.borderColor
         : pluginSettings.defaultBorderColor,
     },
     warning: {
-      icon: pluginSettings.warning_icon ?? pluginSettings.defaultAlertIcon,
-      sound: pluginSettings.warning_sound ?? null,
-      boxColor: pluginSettings.warning_customBoxColor
-        ? pluginSettings.warning_boxColor
+      icon: pluginSettings.warning?.icon
+        ? pluginSettings.warning.icon
+        : '_/assets/img/PanicAlertIcon.png',
+      sound: pluginSettings.warning?.sound ?? null,
+      boxColor: pluginSettings.warning?.customBoxColor
+        ? pluginSettings.warning?.boxColor
         : pluginSettings.defaultBoxColor,
-      borderColor: pluginSettings.warning_customBoxColor
-        ? pluginSettings.warning_borderColor
+      borderColor: pluginSettings.warning?.customBoxColor
+        ? pluginSettings.warning?.borderColor
         : pluginSettings.defaultBorderColor,
     },
     urgent: {
-      icon: pluginSettings.urgent_icon ?? pluginSettings.defaultAlertIcon,
-      sound: pluginSettings.urgent_sound ?? null,
-      boxColor: pluginSettings.urgent_customBoxColor
-        ? pluginSettings.urgent_boxColor
+      icon: pluginSettings.urgent?.icon
+        ? pluginSettings.urgent.icon
+        : '_/assets/img/UrgentAlertIcon.png',
+      sound: pluginSettings.urgent?.sound ?? null,
+      boxColor: pluginSettings.urgent?.customBoxColor
+        ? pluginSettings.urgent?.boxColor
         : pluginSettings.defaultBoxColor,
-      borderColor: pluginSettings.urgent_customBoxColor
-        ? pluginSettings.urgent_borderColor
+      borderColor: pluginSettings.urgent?.customBoxColor
+        ? pluginSettings.urgent?.borderColor
         : pluginSettings.defaultBorderColor,
-      text: pluginSettings.urgent_text ?? 'Uh oh! I think Spooder crashed!',
+      text: pluginSettings.urgent?.text ?? 'Uh oh! I think Spooder crashed!',
     },
   };
 
@@ -41,17 +52,18 @@ function onOSCOpen() {
   console.log('ALERTS', alerts);
   for (let a in alerts) {
     if (alerts[a].sound != null && alerts[a].sound != '') {
-      PIXI.sound.add(a + '-sound', getAssetPath(alerts[a].sound));
-      app.loader.add(a + '-sound', getAssetPath(alerts[a].sound));
+      PIXI.sound.add(a + '-sound', findAssetPath(alerts[a].sound));
+      app.loader.add(a + '-sound', findAssetPath(alerts[a].sound));
       console.log('SOUND LOADING', a + '-sound');
     }
     if (alerts[a].icon.endsWith('gif')) {
-      app.loader.add(a, getAssetPath(alerts[a].icon));
+      app.loader.add(a, findAssetPath(alerts[a].icon));
     } else {
       let newImage = document.createElement('img');
-      newImage.src = getAssetPath(alerts[a].icon);
+      console.log('IMAGE LOADING', alerts[a].icon);
+      newImage.src = findAssetPath(alerts[a].icon);
       newImage.onerror = (e) => {
-        newImage.src = getAssetPath(pluginSettings.defaultAlertIcon);
+        newImage.src = './assets/img/DefaultAlertIcon.png';
       };
       newImage.onload = () => {
         newImage.width = 120;
@@ -100,7 +112,9 @@ function getImg(url) {
       newImage.src = url;
       newImage.crossOrigin = 'anonymous';
       newImage.onerror = (e) => {
-        newImage.src = getAssetPath(pluginSettings.defaultAlertIcon);
+        newImage.src = pluginSettings.defaultAlertIcon
+          ? getAssetPath(pluginSettings.defaultAlertIcon)
+          : '../assets/img/DefaultAlertIcon.png';
       };
       newImage.onload = () => {
         newImage.width = 120;
@@ -113,4 +127,12 @@ function getImg(url) {
       };
     }
   });
+}
+
+function findAssetPath(url) {
+  if (url.startsWith('_')) {
+    return url.replace('_', '.');
+  } else {
+    return getAssetPath(url);
+  }
 }
