@@ -239,12 +239,45 @@
           "condition": "equals",
           "value": "asset"
         }
+      },
+      "customBoxColor": {
+        "label": "Custom Box Color",
+        "type": "boolean"
+      },
+      "boxColor": {
+        "label": "Box Color",
+        "type": "color",
+        "showif": {
+          "variable": "customBoxColor",
+          "condition": "equals",
+          "value": true
+        }
+      },
+      "borderColor": {
+        "label": "Border Color",
+        "type": "color",
+        "showif": {
+          "variable": "customBoxColor",
+          "condition": "equals",
+          "value": true
+        }
+      },
+      "tts_text": {
+        "label": "TTS Text",
+        "type": "code",
+        "options": {
+          "use_response_processor": true
+        }
       }
     },
     "defaults": {
       "voice": "tts",
       "icon_type": "profile_pic",
-      "icon": ""
+      "icon": "",
+      "customBoxColor": false,
+      "boxColor": "#000000",
+      "borderColor": "#000000",
+      "tts_text": ""
     }
   }
 }
