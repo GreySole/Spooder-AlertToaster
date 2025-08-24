@@ -1,3 +1,5 @@
+import { Request, Response } from "express";
+
 export interface KeyedObject {
   [key: string]: any;
 }
@@ -11,6 +13,7 @@ export interface StreamMessage {
   message: string;
   messageType: string;
   emotes: any[];
+  respond: (message: string) => void;
   tags: KeyedObject;
   isBroadcaster: boolean;
   isMod: boolean;
@@ -18,9 +21,14 @@ export interface StreamMessage {
   isVIP: boolean;
   isFirstMessage: boolean;
   isReturningChatter: boolean;
+  shareId?: string;
   triggeredEventData?: KeyedObject;
   platformEventData?: KeyedObject;
   pluginEventData?: KeyedObject;
+}
+
+export interface PluginChatInfo {
+  sayInChat: (message: string, platform: string, channel: string) => void;
 }
 
 export interface PluginModule {
@@ -31,18 +39,34 @@ export interface PluginModule {
   spooderTheme: PluginThemeInfo;
   osc: PluginOscInfo;
   public: PluginPublicInfo;
+  chat: PluginChatInfo;
+  getModule: (name: string) => KeyedObject | undefined;
   registerPluginApi: (
-    router: 'local' | 'public',
-    method: 'get' | 'post' | 'put' | 'delete',
+    router: "local" | "public",
+    method: "get" | "post" | "put" | "delete",
     address: string,
-    funct: (req: Request, res: Response) => void,
+    funct: (req: Request, res: Response) => void
   ) => void;
   getActiveViewer: (req: Request) => KeyedObject | undefined;
+  getAssetPath: (assetPath: string) => string;
+  getAssetUrl: (assetPath: string) => string;
+  getLocalFilePath: (filePath: string) => string;
+  getSettings: () => KeyedObject | undefined;
+  setSettings: (settings: KeyedObject) => void;
+  getShareSettings: (shareId: string) => KeyedObject | undefined;
+  setShareSettings: (shareId: string, settings: KeyedObject) => void;
+  getSettingsForm: () => KeyedObject | undefined;
+  setSettingsForm: (form: KeyedObject) => void;
+  getEventsForm: () => KeyedObject | undefined;
+  setEventsForm: (form: KeyedObject) => void;
+  getOverlayUrl: () => string;
+  getUtilityUrl: () => string;
   settings?: KeyedObject;
   onSettings?: (settings: KeyedObject) => void;
   onLoad?: () => void;
   onDestroy?: () => void;
   onChat?: (message: StreamMessage) => void;
+  onCommunityChat?: (type: string, data: any) => void;
   onOSC?: (message: OSCMessage) => void;
   onEvent?: (event: string, data: KeyedObject) => void;
   registerExtra: (key: string, value: any) => void;
@@ -55,24 +79,34 @@ export interface OSCMessage {
   args: MessageArgValue[];
 }
 
-interface PluginSpooderModules {
-  stream: KeyedObject;
-  community: KeyedObject;
-  control: KeyedObject;
+export interface IntegrationModuleCollection {
+  [key: string]: IntegrationModule;
 }
 
-interface PluginPublicInfo {
+export interface IntegrationModule {
+  subscribeToModuleEvent: (eventName: string, callback: Function) => void;
+  [key: string]: any;
+}
+
+export interface PluginSpooderModules {
+  stream: IntegrationModuleCollection;
+  community: IntegrationModuleCollection;
+  control: IntegrationModuleCollection;
+  [key: string]: IntegrationModuleCollection;
+}
+
+export interface PluginPublicInfo {
   publicHostUrl: string;
   publicOscUrl: string;
 }
 
-interface PluginOscInfo {
+export interface PluginOscInfo {
   sendToTCP: (address: string, oscValue: any, log?: boolean) => void;
   sendToUDP: (address: string, oscValue: any, log?: boolean) => void;
   udpServers: KeyedObject;
 }
 
-interface PluginConfigInfo {
+export interface PluginConfigInfo {
   ownerName: string;
   botName: string;
   host: string;
@@ -82,7 +116,7 @@ interface PluginConfigInfo {
   externalHandle: string;
 }
 
-interface PluginThemeInfo {
+export interface PluginThemeInfo {
   webui: KeyedObject;
   spooderPet: KeyedObject;
 }

@@ -19,80 +19,6 @@ export default class AlertToaster extends PluginBase {
   onChat(message: StreamMessage) {}
   onCommunityChat(type: string, message: any) {}
   onOSC(message: OSCMessage) {
-    const activePlugins = this.activePlugins;
-
-    if (!this.isConnected && message.address.endsWith('/connect')) {
-      let pluginInfo = typeof message.args[0] === 'string' ? JSON.parse(message.args[0]) : {};
-      if (pluginInfo == 1) {
-        pluginInfo = {
-          name: message.address.split('/')[1],
-        };
-      }
-      if (
-        (pluginInfo.external == true && this.settings?.displayexternalconnects == true) ||
-        pluginInfo.external == false
-      ) {
-        let pluginName =
-          activePlugins[pluginInfo.name]?.name != null
-            ? activePlugins[pluginInfo.name].name
-            : pluginInfo.name;
-        let externalTxt = pluginInfo.external == true ? ' externally' : '';
-        this.osc.sendToTCP(
-          '/alerttoaster/alert',
-          JSON.stringify({
-            icon:
-              'http://' +
-              this.spooderConfig.host +
-              ':' +
-              this.spooderConfig.hostPort +
-              '/icons/' +
-              pluginInfo.name +
-              '.png',
-            text: pluginName + ': OSC Connected' + externalTxt,
-          }),
-        );
-      }
-    }
-
-    if (message.address != '/alerttoaster/connect' && message.address.endsWith('/connect')) {
-      let pluginInfo = typeof message.args[0] === 'string' ? JSON.parse(message.args[0]) : {};
-      if (pluginInfo == 1) {
-        pluginInfo = {
-          name: message.address.split('/')[1],
-        };
-      }
-      let pluginName =
-        activePlugins[pluginInfo.name]?.name != null
-          ? activePlugins[pluginInfo.name].name
-          : pluginInfo.name;
-      if (
-        (pluginInfo.external == true && this.settings?.displayexternalconnects == true) ||
-        pluginInfo.external == false
-      ) {
-        let externalTxt = pluginInfo.external == true ? ' externally' : '';
-        this.connectAlerts[pluginInfo.name] = {
-          address: '/spooder/alert',
-          data: JSON.stringify({
-            icon:
-              'http://' +
-              this.spooderConfig.host +
-              ':' +
-              this.spooderConfig.hostPort +
-              '/icons/' +
-              pluginInfo.name +
-              '.png',
-            text: pluginName + ': OSC Connected' + externalTxt,
-          }),
-        };
-      }
-      return;
-    }
-
-    if (message.address == '/alerttoaster/connect') {
-      this.isConnected = true;
-      this.osc.sendToTCP('/alerttoaster/plugins', JSON.stringify(this.connectAlerts));
-    }
-
     if (message.address.startsWith('/spooder/alert')) {
       this.osc.sendToTCP('/alerttoaster/alert', message.args[0]);
     }
@@ -110,8 +36,7 @@ export default class AlertToaster extends PluginBase {
         console.error('No TTS data provided');
         return;
       }
-      console.log('AlertToaster TTS Data', ttsData);
-      let fullMessage = eventData.message;
+      let fullMessage = ttsData.tts_text;
       let firstWord = fullMessage.substring(0, fullMessage.indexOf(' ')).toLowerCase();
       let voice = 'david';
       let sound = '';
@@ -148,6 +73,8 @@ export default class AlertToaster extends PluginBase {
           voice: voice,
           sound: sound,
           ttsIcon: profilePicture,
+          boxColor: eventData.pluginEventData?.boxColor,
+          borderColor: eventData.pluginEventData?.borderColor,
         }),
       );
     } else if (eventName == 'show_alert') {

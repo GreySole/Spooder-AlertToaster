@@ -48,6 +48,8 @@ function getOSCMessage(message) {
             icon: ttsObj.ttsIcon,
             text: ttsObj.text,
             sound: ttsObj.sound,
+            boxColor: ttsObj.boxColor,
+            borderColor: ttsObj.borderColor,
             tts: {
               voice: ttsObj.voice,
               icon: ttsObj.ttsIcon,
