@@ -15,7 +15,12 @@ export default class AlertToaster extends PluginBase {
 
   ttsVoices = ['david', 'helena', 'hedda', 'zira', 'hazel', 'haruka', 'hortense', 'lucia'];
 
-  onLoad() {}
+  onLoad() {
+    const twitch = this.getModule('twitch');
+    if (twitch) {
+      // Do something with the Twitch module
+    }
+  }
   onChat(message: StreamMessage) {}
   onCommunityChat(type: string, message: any) {}
   onOSC(message: OSCMessage) {
@@ -47,7 +52,7 @@ export default class AlertToaster extends PluginBase {
           fullMessage = fullMessage.substring(firstWord.length + 1);
         }
       } else {
-        voice = ttsData.voice || 'david';
+        voice = (ttsData.voice || 'david').replace(/^tts-/, '');
       }
 
       if (ttsData.sound_type === 'single') {
@@ -73,8 +78,8 @@ export default class AlertToaster extends PluginBase {
           voice: voice,
           sound: sound,
           ttsIcon: profilePicture,
-          boxColor: eventData.pluginEventData?.boxColor,
-          borderColor: eventData.pluginEventData?.borderColor,
+          boxColor: ttsData.customBoxColor ? ttsData.boxColor : this.settings?.defaultBoxColor,
+          borderColor: ttsData.customBoxColor ? ttsData.borderColor : this.settings?.defaultBorderColor,
         }),
       );
     } else if (eventName == 'show_alert') {
@@ -84,8 +89,12 @@ export default class AlertToaster extends PluginBase {
         icon: eventData.pluginEventData?.icon,
         text: alertText,
         sound: eventData.pluginEventData?.sound,
-        boxColor: eventData.pluginEventData?.boxColor,
-        borderColor: eventData.pluginEventData?.borderColor,
+        boxColor: eventData.pluginEventData?.customBoxColor
+          ? eventData.pluginEventData?.boxColor
+          : this.settings?.defaultBoxColor,
+        borderColor: eventData.pluginEventData?.customBoxColor
+          ? eventData.pluginEventData?.borderColor
+          : this.settings?.defaultBorderColor,
       });
     }
   }

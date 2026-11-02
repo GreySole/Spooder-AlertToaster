@@ -66,13 +66,13 @@ async function addToQueue({ icon, text, sound, boxColor, borderColor, tts }) {
     }
     const blob = await fetch(
       encodeURI(
-        'https://talkify.net/api/speech/v2?texttype=text&text=' +
-          text +
-          '&fallbackLanguage=-1&voice=' +
-          tts.voice +
-          '&rate=0.5&key=' +
-          pluginSettings.talkifykey +
-          '&whisper=false&soft=false&wordbreakms=0&volume=0&pitch=0&format=mp3',
+        'http://talkify.net/api/speech/v2?texttype=text&text=' +
+        text +
+        '&fallbackLanguage=-1&voice=' +
+        tts.voice +
+        '&rate=0.5&key=' +
+        pluginSettings.talkifykey +
+        '&whisper=false&soft=false&wordbreakms=0&volume=0&pitch=0&format=mp3',
       ),
     )
       .then((response) => response.blob())

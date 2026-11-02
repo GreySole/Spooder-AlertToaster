@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Request, Response } from 'express';
 import {
   IntegrationModule,
   KeyedObject,
@@ -11,10 +11,10 @@ import {
   PluginSpooderModules,
   PluginThemeInfo,
   StreamMessage,
-} from "./Types";
+} from './Types';
 
 export default class PluginBase implements Partial<PluginModule> {
-  dirname: string = "";
+  dirname: string = '';
   modules: PluginSpooderModules = {
     stream: {},
     community: {},
@@ -22,13 +22,13 @@ export default class PluginBase implements Partial<PluginModule> {
   };
   activePlugins: KeyedObject = {};
   spooderConfig: PluginConfigInfo = {
-    ownerName: "",
-    botName: "",
-    host: "",
+    ownerName: '',
+    botName: '',
+    host: '',
     hostPort: 0,
     oscTcpPort: 0,
     oscUdpPort: 0,
-    externalHandle: "disabled",
+    externalHandle: 'disabled',
   };
   spooderTheme: PluginThemeInfo = {
     webui: {},
@@ -44,8 +44,8 @@ export default class PluginBase implements Partial<PluginModule> {
     udpServers: {},
   };
   public: PluginPublicInfo = {
-    publicHostUrl: "",
-    publicOscUrl: "",
+    publicHostUrl: '',
+    publicOscUrl: '',
   };
   chat: PluginChatInfo = {
     sayInChat: (message: string, channel?: string): void => {
@@ -55,10 +55,10 @@ export default class PluginBase implements Partial<PluginModule> {
   settings: KeyedObject = {};
 
   registerPluginApi(
-    router: "local" | "public",
-    method: "get" | "post" | "put" | "delete",
+    router: 'local' | 'public',
+    method: 'get' | 'post' | 'put' | 'delete',
     address: string,
-    funct: (req: Request, res: Response) => void
+    funct: (req: Request, res: Response) => void,
   ): void {
     // Default implementation does nothing
   }
@@ -74,12 +74,12 @@ export default class PluginBase implements Partial<PluginModule> {
 
   getAssetPath(assetPath: string): string {
     // Default implementation returns an empty string
-    return "";
+    return '';
   }
 
   getLocalFilePath(filePath: string): string {
     // Default implementation returns an empty string
-    return "";
+    return '';
   }
 
   onSettings(settings: KeyedObject): void {

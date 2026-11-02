@@ -125,3 +125,10 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# Spooder-specific: built locally / by the release workflow, and per-install data
+/build/
+/dist/
+/js/
+/settings.json
+/_share/

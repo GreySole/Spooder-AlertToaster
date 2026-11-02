@@ -86,7 +86,7 @@ async function createToast({ icon, text, sound, boxColor, borderColor, tts }) {
 
   if (tts) {
     icon = tts.icon;
-    await playSound(sound, async () => {
+    const playTts = async () => {
       const ttsSound = await PIXI.sound.Sound.from({
         url: tts.blob,
         autoPlay: true,
@@ -105,7 +105,12 @@ async function createToast({ icon, text, sound, boxColor, borderColor, tts }) {
       });
 
       persistentQ.pop();
-    });
+    };
+    if (sound) {
+      await playSound(sound, playTts);
+    } else {
+      await playTts();
+    }
   } else {
     if (sound) {
       playSound(sound);

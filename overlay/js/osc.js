@@ -40,6 +40,7 @@ function getOSCMessage(message) {
           break;
         case 'tts':
           let ttsObj = JSON.parse(message.args[0]);
+          console.log("TTS", ttsObj);
           if (ttsObj.ttsIcon != null) {
             getImg(ttsObj.ttsIcon);
           }

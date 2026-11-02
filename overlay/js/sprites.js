@@ -14,7 +14,7 @@ function getSprite(url) {
   } else if (loadedAssets[url] != null) {
     return new PIXI.Sprite.from(loadedAssets[url]);
   } else if (url.startsWith('http')) {
-    return new PIXI.Sprite.from(url);
+    return spriteFromUrl(url);
   } else {
     if (url.endsWith('.gif')) {
       return new Promise((resolve, reject) => {
@@ -31,6 +31,21 @@ function getSprite(url) {
           });
       });
     }
-    return new PIXI.Sprite.from(getAssetPath(url));
+    return spriteFromUrl(getAssetPath(url));
   }
+}
+
+// PIXI.Sprite.from() returns a sprite immediately while its texture loads in the
+// background, so callers awaiting getSprite() would get a sprite with no image yet.
+// Wait for the underlying texture to finish loading before resolving.
+function spriteFromUrl(url) {
+  const sprite = PIXI.Sprite.from(url);
+  const baseTexture = sprite.texture.baseTexture;
+  if (baseTexture.valid) {
+    return sprite;
+  }
+  return new Promise((resolve, reject) => {
+    baseTexture.once('loaded', () => resolve(sprite));
+    baseTexture.once('error', (error) => reject(error));
+  });
 }

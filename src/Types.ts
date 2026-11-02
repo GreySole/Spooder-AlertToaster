@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Request, Response } from 'express';
 
 export interface KeyedObject {
   [key: string]: any;
@@ -42,10 +42,10 @@ export interface PluginModule {
   chat: PluginChatInfo;
   getModule: (name: string) => KeyedObject | undefined;
   registerPluginApi: (
-    router: "local" | "public",
-    method: "get" | "post" | "put" | "delete",
+    router: 'local' | 'public',
+    method: 'get' | 'post' | 'put' | 'delete',
     address: string,
-    funct: (req: Request, res: Response) => void
+    funct: (req: Request, res: Response) => void,
   ) => void;
   getActiveViewer: (req: Request) => KeyedObject | undefined;
   getAssetPath: (assetPath: string) => string;

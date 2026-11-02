@@ -1,5 +1,3 @@
-const { getAsset } = require('node:sea');
-
 function onOSCOpen() {
   let defaultImage = document.createElement('img');
   defaultImage.src =
